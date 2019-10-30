@@ -7,9 +7,10 @@
 #include <stdlib.h>
 #include <vector>
 #include <exception>
-
 using namespace std;
 
+#define vect_double   vector<double>
+#define vect_int      vector<int>      
 #define BUF_SIZE 1023 * 1024 *  1024// 12M
 
 /*************** Exception  Defination*****************************/
@@ -47,28 +48,36 @@ class Mat
         
 
     public:
-        int         dimension; // 维度
-        int         size;      // 一位数组总长度
-        int     *   shape;
-        double  *   data;
+        int             dimension; // 维度
+        int             size;      // 一位数组总长度
+        vector<int>     shape;
+        vector<double>  data;
 
-        template<int data_size, int shape_size>
-        Mat(double (&raw_data)[data_size], int (&s)[shape_size]);
-        int get_length_from_shape(int *s);
-        double* flatten();
+        
+        bool shape_match(vect_int _shape, int _size);
+        Mat(vector<double> _data, vector<int> _shape);
+        int get_length_from_shape(vect_int s);
+        vect_double flatten();
 
         Mat operator* (Mat rmatrix);
         void print(); 
 };
 
 // class implementation
-double* Mat::flatten() {
-    return this -> data;
+
+Mat::Mat(vector<double> _data, vector<int> _shape)
+{
+    size = (int)_data.size();
+    dimension = (int)_shape.size();
+    shape = _shape;
+    data = _data;
 }
 
+vector<double> Mat::flatten() {
+    return this -> data;
+} 
 
- 
-int  Mat::get_length_from_shape(int *s) {
+int  Mat::get_length_from_shape(vect_int s) {
     int _size = 1;
     int d = dimension;
     while(d)
@@ -76,22 +85,16 @@ int  Mat::get_length_from_shape(int *s) {
     return _size;
 }
 
-
-template<int data_size, int shape_size>
- Mat::Mat(double (&raw_data)[data_size], int (&s)[shape_size]) {
-    // 获取维度
-    dimension = shape_size;
-
-    //维度与传入矩阵不匹配抛出异常
-    size = get_length_from_shape(s);
-    
-    if(size != data_size)
-        throw ShapeMatchError();
-    shape = s;
-    data = raw_data;    
+bool Mat::shape_match(vect_int _shape, int _size) {
+    if(dimension !=  _size) {
+        return false;
+    }
+    for(int i=0;i <  _size; i ++)
+        if(shape[i] != _shape[i])
+            return false;
+    return true;
 }
 
- 
 void  Mat::print() {
     char shape_tmp[BUFSIZ] = {'\0'};
     char matrix_tmp[BUFSIZ * 2] = {'\0'};
@@ -159,34 +162,36 @@ void  Mat::print_matrix(string& s, int dimension_level, int& ped, int c)
  Mat  Mat::operator* (Mat rmatrix) {
     int rsize = rmatrix.size;
     int rdimension = rmatrix.dimension;
-    int* rshape = rmatrix.shape;
-    double* rdata = rmatrix.flatten();
+    vect_int rshape(rmatrix.shape);
+    vect_double rdata = rmatrix.flatten();
 
-    if(size != rmatrix.get_length_from_shape(rshape))
-        throw ShapeMatchError()
-    double tmp[size];
-
-
+    if(size != rsize || !shape_match(rshape, rdimension))
+        throw ShapeMatchError();
+    vect_double data_tmp;
+    vect_int shape_tmp(shape);
+    for(int i = 0; i < size; i++)
+        data_tmp.push_back(data[i] * rdata[i]);
+    Mat mat(data_tmp, rshape);
+    return mat;
 
 }
 
 
-
-
-
-
 void hello()
 {
-    int size = 8;
-    double *v = new double[size]{ 1, 2, 3,
-      4, 5, 6, 7, 8
-    };
-    int  shape[] = {2,2,2};
 
+    vect_double v = { 1, 2, 3,
+      4, 5, 6, 7, 8};
+    vect_int  shape = {2,2,2};
 
-
+     vect_double v2 = {2,2,2,2,
+     2,2,2,2};
+     printf(to_string(v[2]).c_str());
     try{
-        Mat<double> mat(v, shape);
+        Mat mat1(v, shape);
+        Mat mat2(v2, shape);
+        
+        Mat mat = mat1 * mat2;
         mat.print();
     }
        
