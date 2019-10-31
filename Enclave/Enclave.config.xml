@@ -5,10 +5,10 @@
   <StackMaxSize>0x40000</StackMaxSize>   
 
   <!-- 1M -->
-  <HeapMaxSize>0x100000</HeapMaxSize>
+  <!-- <HeapMaxSize>0x100000</HeapMaxSize>  -->
 
-<!-- 128M-->
-<!-- <HeapMaxSize>0x280000000</HeapMaxSize> -->
+<!-- 128M -->
+<HeapMaxSize>0x8000000</HeapMaxSize>
 
   <TCSNum>10</TCSNum>
   <TCSPolicy>1</TCSPolicy>
