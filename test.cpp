@@ -9,8 +9,9 @@ using namespace std;
 int main()
 {
     vector<int> a = {1,2,3,4,5};
-    auto iter = a.rbegin();
+    auto iter = a.begin();
     iter ++;
+    a.insert(a.begin(), 10);
     
     return 0;
 }

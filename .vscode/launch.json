@@ -5,7 +5,7 @@
     "version": "0.2.0",
      "configurations": [
      {
-         "name": "sgx-gdb-test",
+         "name": "gdb-test",
          "type": "cppdbg",
          "request": "launch",
          "program": "${workspaceFolder}/test",

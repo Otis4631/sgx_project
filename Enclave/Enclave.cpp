@@ -66,7 +66,8 @@ void set_precison(string& s,int precision)//precision n.精度
     int pos = (int)s.find(".");
     int i = (int)s.length() - 1 - pos - precision;
     while (i--)
-        s.pop_back();
+        if(s[s.length() - 1] == '0')
+            s.pop_back();
 }
 /***************   Tools   *****************************/
 
@@ -133,7 +134,7 @@ void Mat::expand_from_block(vect_double& data_tmp, int block, int times) {
     for(int old_i = 0; old_i < _size;) {
         for(int t = 0; t < times; t ++) {
             for(int block_i = 0; block_i < block; block_i ++) {
-                data_tmp.insert(data_tmp.begin() + old_i + block + block_i, source_data[(old_i + block_i) % block]); // 取余数：限定在源数据空间内，old_i随插入数据增长，不适合直接指示源数据。
+                data_tmp.insert(data_tmp.begin() + old_i + block + block_i, data_tmp[(old_i + block_i)]); // 取余数：限定在源数据空间内，old_i随插入数据增长，不适合直接指示源数据。
             }
             old_i += block;
         }
@@ -147,7 +148,7 @@ Mat Mat::broadcast(vect_int& new_shape) {
     /***
      * 将当前矩阵广播至新的矩阵
      * new_shape: 广播后的新shape
-     * 
+     *  插入操作会使原迭代器失效，改为索引实现
      */
     int new_size = (int)(get_length_from_shape(new_shape));
     int expand_times = new_size / size;
@@ -155,23 +156,28 @@ Mat Mat::broadcast(vect_int& new_shape) {
         return *(this);
 
     vect_double data_tmp(data); //pBUG: 扩展空间不足
-    auto iter = shape.rbegin();
-    auto new_iter = new_shape.rbegin();
-    while(new_iter != new_shape.rend()) { //遍历完所有的新的维度
-        if(iter == shape.rend() || *iter == 1) { // 不存在旧维度或者为1，进行扩展
+    vect_int old_shape(shape);
+    int old_iter = (int)old_shape.size() - 1;
+    int new_iter = (int)new_shape.size() - 1;
+    while(new_iter != -1) { //遍历完所有的新的维度
+        if(old_iter == -1 || (old_shape[old_iter] == 1 && new_shape[new_iter] != 1)) { // 不存在旧维度或者为1，进行扩展
             int block = 1;
-            auto p = iter;
-            while(p >= shape.rbegin()) { // 计算block
-                    if(*p)
-                        block *= *p;
-                    p --;
+            auto p = old_iter;
+            while(p < (int)old_shape.size()) { // 计算block
+                    if(p >= 0)
+                        block *= old_shape[p];
+                    p ++;
             }
-            expand_from_block(data_tmp, block, *new_iter - 1);
-            *iter = *new_iter;
+            expand_from_block(data_tmp, block, new_shape[new_iter] - 1);
+            if(old_iter == -1)
+                old_shape.insert(old_shape.begin(), new_shape[new_iter]);
+
+            else
+                old_shape[old_iter] = new_shape[new_iter]; 
         }
-        new_iter ++;
-         if(iter < shape.rend())
-                iter ++;
+        new_iter --;
+         if(old_iter > -1)
+                old_iter --;
     } // while
 
     if((int)data_tmp.size() != new_size) {
@@ -196,12 +202,10 @@ bool Mat::is_broadcastable(vect_int _shape, vect_int& lshape, vect_int& rshape) 
     bool able = true;
     auto _riter = _shape.rbegin();
     auto riter = shape.rbegin();
-
-
     for(; _riter != _shape.rend() && riter != shape.rend(); _riter ++, riter++) {
         int l = *riter, r = *_riter;
-        if(*_riter != *riter) {
-            if(*_riter == 1 || *riter == 1){ // 不同但有一个矩阵维度是1，可以广播
+        if(*_riter != *riter) { // 不同
+            if(*_riter == 1 || *riter == 1){ // 但有一个矩阵维度是1，可以广播
                 if(*riter == 1)
                     l = *_riter;
                 else
@@ -215,9 +219,7 @@ bool Mat::is_broadcastable(vect_int _shape, vect_int& lshape, vect_int& rshape) 
         }
         lshape.push_back(l);
         rshape.push_back(r);
-            
     } // for
-
         /**
          * 维度扩充：低维度的矩阵复制高纬度矩阵对应轴上的长度
          * example:
@@ -295,7 +297,7 @@ string Mat::shape_to_string(vect_int* _shape = NULL) {
         if(i < d - 1 || d == 1)
             shape_str +=  ", ";     
     }
-    shape_str += ")\n";
+    shape_str += ")\n\n";
     return shape_str;
 }
 
@@ -312,11 +314,11 @@ void  Mat::print() {
     strncpy(shape_tmp, shape_str.c_str(), strlen(shape_str.c_str()));
 
     //IDEA:
-    // 两次OCALL 时间开销大
+    // 多次OCALL 时间开销大
     printf(matrix_tmp);
+    printf(", with shape: ");
     printf(shape_tmp);
 }
-
 void  Mat::matrix_to_string(string& s, int dimension_level, int& ped, int c)
 {
     /**
@@ -349,7 +351,7 @@ void  Mat::matrix_to_string(string& s, int dimension_level, int& ped, int c)
         if (!c) s+= "," + get_n_linefeed(1 + dimension - dimension_level) + get_n_space(dimension_level); // c=1, 后面无元素，不用换行
     }
     else
-        s += "\n";
+        s += "";
 }
    /*****Operator Overloading****/
  Mat  Mat::operator* (Mat rmatrix) {
@@ -365,20 +367,20 @@ void  Mat::matrix_to_string(string& s, int dimension_level, int& ped, int c)
         bool broadcastable = is_broadcastable(rshape, bc_lshape, bc_rshape);
         res_shape = bc_lshape;
         if(broadcastable) {
-            printf(shape_to_string(&bc_lshape).c_str());
-            printf(shape_to_string(&bc_rshape).c_str());
+             
             lmat = broadcast(bc_lshape);
             rmat = rmatrix.broadcast(bc_rshape);
+            //
         }
         else { // TODO: 抛出乘法异常
             printf("无法进行广播\n");
             throw exception();
         }
     }
-        
     vect_double data_tmp;
     vect_int shape_tmp(res_shape);
-    for(int i = 0; i < size; i++)
+    int res_size = get_length_from_shape(res_shape);
+    for(int i = 0; i < res_size; i++)
         data_tmp.push_back(lmat.data[i] * rmat.data[i]);
     Mat mat(data_tmp, res_shape);
     return mat;
@@ -396,8 +398,7 @@ void  Mat::matrix_to_string(string& s, int dimension_level, int& ped, int c)
         bool broadcastable = is_broadcastable(rshape, bc_lshape, bc_rshape);
         res_shape = bc_lshape;
         if(broadcastable) {
-            printf(shape_to_string(&bc_lshape).c_str());
-            printf(shape_to_string(&bc_rshape).c_str());
+             
             lmat = broadcast(bc_lshape);
             rmat = rmatrix.broadcast(bc_rshape);
             //
@@ -406,17 +407,17 @@ void  Mat::matrix_to_string(string& s, int dimension_level, int& ped, int c)
             printf("无法进行广播\n");
             throw exception();
         }
-
     }
     vect_double data_tmp;
     vect_int shape_tmp(res_shape);
-    for(int i = 0; i < size; i++)
+    int res_size = get_length_from_shape(res_shape);
+    for(int i = 0; i < res_size; i++)
         data_tmp.push_back(lmat.data[i] / rmat.data[i]);
     Mat mat(data_tmp, res_shape);
     return mat;
 }
  Mat  Mat::operator+ (Mat rmatrix) {
-    int rsize = rmatrix.size;
+        int rsize = rmatrix.size;
     int rdimension = rmatrix.dimension;
     vect_int rshape(rmatrix.shape);
     vect_int res_shape(shape);
@@ -428,9 +429,7 @@ void  Mat::matrix_to_string(string& s, int dimension_level, int& ped, int c)
         bool broadcastable = is_broadcastable(rshape, bc_lshape, bc_rshape);
         res_shape = bc_lshape;
         if(broadcastable) {
-            printf(shape_to_string(&bc_lshape).c_str());
-            printf(shape_to_string(&bc_rshape).c_str());
-            printf("\n");
+             
             lmat = broadcast(bc_lshape);
             rmat = rmatrix.broadcast(bc_rshape);
             //
@@ -439,12 +438,11 @@ void  Mat::matrix_to_string(string& s, int dimension_level, int& ped, int c)
             printf("无法进行广播\n");
             throw exception();
         }
-
     }
-        
     vect_double data_tmp;
     vect_int shape_tmp(res_shape);
-    for(int i = 0; i < size; i++)
+    int res_size = get_length_from_shape(res_shape);
+    for(int i = 0; i < res_size; i++)
         data_tmp.push_back(lmat.data[i] + rmat.data[i]);
     Mat mat(data_tmp, res_shape);
     return mat;
@@ -462,8 +460,7 @@ void  Mat::matrix_to_string(string& s, int dimension_level, int& ped, int c)
         bool broadcastable = is_broadcastable(rshape, bc_lshape, bc_rshape);
         res_shape = bc_lshape;
         if(broadcastable) {
-            printf(shape_to_string(&bc_lshape).c_str());
-            printf(shape_to_string(&bc_rshape).c_str());
+             
             lmat = broadcast(bc_lshape);
             rmat = rmatrix.broadcast(bc_rshape);
             //
@@ -472,7 +469,6 @@ void  Mat::matrix_to_string(string& s, int dimension_level, int& ped, int c)
             printf("无法进行广播\n");
             throw exception();
         }
-
     }
     vect_double data_tmp;
     vect_int shape_tmp(res_shape);
@@ -489,30 +485,21 @@ void  Mat::matrix_to_string(string& s, int dimension_level, int& ped, int c)
 
 void hello()
 {
-
-    vect_double v1 = {1, 2, 3, 4, 5, 6};
+     vect_double v1 = {1, 2, 3, 4, 5, 6};
     vect_int  shape1 = {3, 2};
+    vect_double v2 = {1, 2};
+    vect_int  shape2 = {2};
 
-    vect_double v2 = {1};
-    vect_int  shape2 = {1};
     try{
-        Mat mat1(v1, shape1);
-        Mat mat2(v2, shape2);
-        
-       // mat1.print();
 
-        Mat mat = mat1 * mat2;
-        mat.print();
+
+    Mat mat2(v2, shape2);
+    Mat mat1(v1, shape1);
+    Mat mat = mat2 - mat1;
+    mat.print();
+
     }
-       
     catch(exception& e){
         printf(e.what());
     }
 }
-
-
-
-
-
-
-
