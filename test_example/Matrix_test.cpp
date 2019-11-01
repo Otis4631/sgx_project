@@ -65,6 +65,23 @@ int main() {
   [4.00,4.00]], with shape: (3, 2)
 ****/
 
+/********* test case 3 ***********/
+// dot 矩阵乘法测试
+  vect_double v1 = {1, 2, 3, 4, 5, 6};
+    vect_int  shape1 = {3, 2};
+    vect_double v2 = {1,2};
+    vect_int  shape2 = {2,1};
+
+    try{
+    Mat mat1(v1, shape1);
+    Mat mat2(v2, shape2);
+    Mat mat = mat1.dot2d(mat2);
+    mat.print();
+/******Except: ***********
+[[5.00],
+ [11.00],
+ [17.00]], with shape: (3, 1)
+****/
 
 
 }

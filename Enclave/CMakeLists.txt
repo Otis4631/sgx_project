@@ -12,19 +12,17 @@ ENDIF()
 SET(Signed_enclave_name enclave.signed.so)
 SET(Enclave_Name enclave)
 
-SET(TRUSTED_BRIAGE Enclave_t.c)
+SET(TRUSTED_BRIDGE Enclave_t.c)
 
-ADD_CUSTOM_COMMAND(OUTPUT ${TRUSTED_BRIAGE}
+ADD_CUSTOM_COMMAND(OUTPUT ${TRUSTED_BRIDGE}
     COMMAND ${SGX_EDGER8R} --trusted ${PROJECT_SOURCE_DIR}/Enclave/Enclave.edl --search-path ${PROJECT_SOURCE_DIR}/Enclave --search-path ${SGX_SDK}/include
     COMMENT "generate trust briage functions"
 )
 
 ADD_CUSTOM_TARGET(
-    tcode ALL
-   DEPENDS ${TRUSTED_BRIAGE}
+    trusted_bridge ALL
+   DEPENDS ${TRUSTED_BRIDGE}
 )
-
-
 
 SET(Crypto_Library_Name sgx_tcrypto)
 FILE(GLOB_RECURSE Enclave_Cpp_Files "*.cpp")
@@ -46,7 +44,7 @@ SET(CMAKE_SHARED_LINKER_FLAGS ${Enclave_Link_Flags})#设置共享库的链接选
 LINK_DIRECTORIES(${SGX_LIBRARY_PATH})#共享库链接其他库的时候的搜索路径，此处是SDK中提供的静态库
 
 
-ADD_LIBRARY(${Enclave_Name} SHARED ${Enclave_Cpp_Files} ${TRUSTED_BRIAGE})#生成libenclave.so
+ADD_LIBRARY(${Enclave_Name} SHARED ${Enclave_Cpp_Files} ${TRUSTED_BRIDGE})#生成libenclave.so
 TARGET_LINK_LIBRARIES(enclave sgx_trts)#链接libenclave.so需要的库
 TARGET_LINK_LIBRARIES(enclave  sgx_tcxx sgx_tstdc sgx_tcrypto sgx_tservice) #链接libenclave.so需要的库
 
@@ -55,6 +53,6 @@ ADD_CUSTOM_COMMAND(OUTPUT ${Signed_enclave_name} POST_BUILD
     COMMAND ${SGX_ENCLAVE_SIGNER} sign -key ${CMAKE_CURRENT_SOURCE_DIR}/Enclave_private.pem -enclave ${PROJECT_SOURCE_DIR}/build/Enclave/libenclave.so -out ${PROJECT_SOURCE_DIR}/build/App/enclave.signed.so -config ${PROJECT_SOURCE_DIR}/Enclave/Enclave.config.xml
     COMMENT "sign the enclave.so => ${Signed_enclave_name}"
 )
-ADD_CUSTOM_TARGET( sgin ALL
+ADD_CUSTOM_TARGET( enclave.sgined.so ALL
     DEPENDS ${Signed_enclave_name}
 )

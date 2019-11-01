@@ -125,15 +125,19 @@ Mat Mat::dot2d(Mat& rmat) {
        printf("shape(%d, %d) and shape(%d, %d) not aligned!", shape[0], shape[1], rmat.shape[0], rmat.shape[1]);
        throw exception();
     }
-    Mat mat_tmp;
-    vect_double data_tmp;
+    int junction = shape[1];
+    int new_size = shape[0] * rmat.shape[1];
+    double array_tmp[shape[0]][rmat.shape[1]] = { 0 };
     for(int row = 0; row < shape[0]; row ++) {
-        for(int col = 0; col < shape[1]; col ++) {
-            // to be finishing
-            // double _tmp += data[row * shape[0] + col] * rmat.data[];
-            // data_tmp.push_back();
-        }
+        for(int col = 0; col < rmat.shape[1]; col ++) 
+            for(int joint = 0; joint < junction; joint ++) {
+                array_tmp[row][col] += data[row * junction + joint] * rmat.data[col + joint * rmat.shape[1]];
+            }
     }
+    double *one = (double*)array_tmp;
+    vect_double data_tmp(one, one + new_size);
+    vect_int shape_tmp = {shape[0], rmat.shape[1]};
+    return Mat(data_tmp, shape_tmp);
 
 
 }
@@ -374,7 +378,7 @@ void  Mat::matrix_to_string(string& s, int dimension_level, int& ped, int c) {
     s += "]";
     if(1 != dimension_level){ // 不是最后一个‘]’，结束后如果后面还有元素，则加上‘,\n’，如果后面没有元素则不加‘,\n’
         
-        if (!c) s+= "," + get_n_linefeed(1 + dimension - dimension_level) + get_n_space(dimension_level); // c=1, 后面无元素，不用换行
+        if (!c) s+= "," + get_n_linefeed(1 + dimension - dimension_level) + get_n_space(dimension_level - 1); // c=1, 后面无元素，不用换行
     }
     else
         s += "";
@@ -511,17 +515,15 @@ void  Mat::matrix_to_string(string& s, int dimension_level, int& ped, int c) {
 
 void hello()
 {
-     vect_double v1 = {1, 2, 3, 4, 5, 6};
+    vect_double v1 = {1, 2, 3, 4, 5, 6};
     vect_int  shape1 = {3, 2};
-    vect_double v2 = {1, 2};
-    vect_int  shape2 = {2};
+    vect_double v2 = {1,2};
+    vect_int  shape2 = {2,1};
 
     try{
-
-
-    Mat mat2(v2, shape2);
     Mat mat1(v1, shape1);
-    Mat mat = mat2 - mat1;
+    Mat mat2(v2, shape2);
+    Mat mat = mat1.dot2d(mat2);
     mat.print();
 
     }

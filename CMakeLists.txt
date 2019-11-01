@@ -15,15 +15,13 @@ ELSE(SGX_DEBUG EQUAL 1)
    SET(SGX_COMMON_CFLAGS "${SGX_COMMON_CFLAGS} -O2")
 ENDIF(SGX_DEBUG EQUAL 1)
 
-######################## common settings #############################################
-MESSAGE(STATUS "SGX COMMON = ${SGX_COMMON_CFLAGS}")
-MESSAGE(STATUS "${PROJECT_SOURCE_DIR}")
+######################## Libtorch settings #############################################
 
 
+set(CMAKE_PREFIX_PATH /data/lz/libtorch)
+find_package(Torch REQUIRED)
 
 
-
-######################## generate the four files #############################################
 
 add_subdirectory(App)                           #执行App文件夹中的CMakeLists.txt
 add_subdirectory(Enclave)                       #执行Enclave文件夹中的CMakeLists.txt

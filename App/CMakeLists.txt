@@ -9,16 +9,16 @@ ELSE()
 ENDIF()
 
 
-set(UNTRUSTED_BRIAGE Enclave_u.c)
+set(UNTRUSTED_BRIDGE Enclave_u.c)
 
-ADD_CUSTOM_COMMAND(OUTPUT ${UNTRUSTED_BRIAGE} PRE_BUILD
+ADD_CUSTOM_COMMAND(OUTPUT ${UNTRUSTED_BRIDGE} PRE_BUILD
     COMMAND ${SGX_EDGER8R} --untrusted ${PROJECT_SOURCE_DIR}/Enclave/Enclave.edl --search-path ${PROJECT_SOURCE_DIR}/Enclave --search-path ${SGX_SDK}/include
    COMMENT "make ucode"
 )
 
 ADD_CUSTOM_TARGET(
-    ucode ALL
-   DEPENDS ${UNTRUSTED_BRIAGE}
+    untrusted_bridge ALL
+   DEPENDS ${UNTRUSTED_BRIDGE}
 )
 
 
@@ -34,9 +34,5 @@ SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${App_Link_Flags}")#设置
 SET(CMAKE_CXX_STANDARD 11)   #设置C++的std，相当于makefile文件中的-std=c++11
 LINK_DIRECTORIES("/usr/lib")    #注意，不可信部分链接的库不再${SDK}/lib64中，而是在/usr/lib中，通过本条指令，这样在链接的时候，我们使用的库Cmake就会在/usr/lib中寻找
 
-
-
-
-
-ADD_EXECUTABLE(${TARGET} ${App_Cpp_Files} ${UNTRUSTED_BRIAGE})#生成可执行文件
-TARGET_LINK_LIBRARIES(${TARGET} ${Urts_Library_Name} pthread ${UAE_Server_Name}) #可执行文件需要的库，注意链接库的先后顺序，有的库需要依赖前面的库函数，如果顺序错误，可能会报错，说找不到相应函数
+ADD_EXECUTABLE(${TARGET} ${App_Cpp_Files} ${UNTRUSTED_BRIDGE})#生成可执行文件
+TARGET_LINK_LIBRARIES(${TARGET} ${Urts_Library_Name} pthread ${UAE_Server_Name} ${TORCH_LIBRARIES}) #可执行文件需要的库，注意链接库的先后顺序，有的库需要依赖前面的库函数，如果顺序错误，可能会报错，说找不到相应函数
