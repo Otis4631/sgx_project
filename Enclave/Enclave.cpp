@@ -88,8 +88,8 @@ class Mat
         vect_double     data;
 
         Mat copy();
-        
-        Mat broadcast(vect_int& new_shape);
+        Mat dot2d(Mat& rmat);
+        Mat broadcast(vect_int& new_shape); 
         string shape_to_string(vect_int* _shape);
         bool shape_match(vect_int _shape, int _size);
         Mat(){};
@@ -103,13 +103,40 @@ class Mat
         Mat operator+ (Mat rmatrix);
         Mat operator- (Mat rmatrix);
 
-
+        Mat dot(Mat& rmat); //矩阵乘法
         void print(); 
 };
 /***************   Class defination   *****************************/
 
 
 /***************   Class implementation   *****************************/
+
+Mat Mat::dot2d(Mat& rmat) {
+    /**
+     * 当前矩阵与传入矩阵做矩阵乘法
+    */
+    if(dimension != 2 || dimension != 2) {
+       // TODO: Finish defination of exception 
+       printf("only support 2d matrix!\n");
+       throw exception();
+   }
+    if(shape[1] != rmat.shape[0]) {
+        // TODO: Finish defination of exception 
+       printf("shape(%d, %d) and shape(%d, %d) not aligned!", shape[0], shape[1], rmat.shape[0], rmat.shape[1]);
+       throw exception();
+    }
+    Mat mat_tmp;
+    vect_double data_tmp;
+    for(int row = 0; row < shape[0]; row ++) {
+        for(int col = 0; col < shape[1]; col ++) {
+            // to be finishing
+            // double _tmp += data[row * shape[0] + col] * rmat.data[];
+            // data_tmp.push_back();
+        }
+    }
+
+
+}
 
 Mat Mat::copy() {
     /**
@@ -319,8 +346,7 @@ void  Mat::print() {
     printf(", with shape: ");
     printf(shape_tmp);
 }
-void  Mat::matrix_to_string(string& s, int dimension_level, int& ped, int c)
-{
+void  Mat::matrix_to_string(string& s, int dimension_level, int& ped, int c) {
     /**
     * s:                temp string buffer to save print
     * dimension_level   current process level of dimension    
