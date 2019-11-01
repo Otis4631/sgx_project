@@ -6,5 +6,6 @@
         "bitset": "cpp",
         "initializer_list": "cpp",
         "utility": "cpp"
-    }
+    },
+    "C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools"
 }
