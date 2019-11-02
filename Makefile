@@ -95,7 +95,6 @@ endif
 Crypto_Library_Name := sgx_tcrypto
 
 
-Enclave_Cpp_Files := Enclave/Enclave.cpp $(wildcard Enclave/Edger8rSyntax/*.cpp) $(wildcard Enclave/TrustedLibrary/*.cpp)
 Enclave_Include_Paths :=  -IInclude -IEnclave -I$(SGX_SDK)/include -I$(SGX_SDK)/include/tlibc -I$(SGX_SDK)/include/libcxx
 
 Enclave_C_Flags := $(Enclave_Include_Paths) -nostdinc -fvisibility=hidden -fpie -ffunction-sections -fdata-sections
@@ -125,8 +124,6 @@ Enclave_Link_Flags := $(Enclave_Security_Link_Flags) \
 	-Wl,-pie,-eenclave_entry -Wl,--export-dynamic  \
 	-Wl,--defsym,__ImageBase=0 -Wl,--gc-sections   \
 	-Wl,--version-script=Enclave/Enclave.lds
-
-Enclave_Cpp_Objects := $(sort $(Enclave_Cpp_Files:.cpp=.o))
 
 Enclave_Name := enclave.so
 Signed_Enclave_Name := enclave.signed.so
@@ -162,7 +159,6 @@ target:  $(App_Name) $(Enclave_Name)
 	@echo "   $(SGX_ENCLAVE_SIGNER) sign -key <your key> -enclave $(Enclave_Name) -out <$(Signed_Enclave_Name)> -config $(Enclave_Config_File)"
 	@echo "You can also sign the enclave using an external signing tool."
 	@echo "To build the project in simulation mode set SGX_MODE=SIM. To build the project in prerelease mode set SGX_PRERELEASE=1 and SGX_MODE=HW."
-
 
 else
 target: $(App_Name) $(Signed_Enclave_Name)
@@ -211,7 +207,6 @@ $(App_Name): App/Enclave_u.o $(App_Cpp_Objects)
 	@$(CXX) $^ -o $@ $(App_Link_Flags)
 	@echo "LINK =>  $@"
 
-
 ######## Enclave Objects ########
 
 Enclave/Enclave_t.h: $(SGX_EDGER8R) Enclave/Enclave.edl
@@ -224,11 +219,17 @@ Enclave/Enclave_t.o: Enclave/Enclave_t.c
 	@$(CC) $(SGX_COMMON_CFLAGS) $(Enclave_C_Flags) -c $< -o $@
 	@echo "CC   $@ <=  $<"
 
+
 Enclave/%.o: Enclave/%.cpp Enclave/Enclave_t.h
 	@$(CXX) $(SGX_COMMON_CXXFLAGS) $(Enclave_Cpp_Flags) -c $< -o $@
-	@echo "CXX  $@ <=  $<"
+	@echo "Line 225: CXX  $@ <=  $<"
+
+Enclave_Cpp_Files := $(wildcard Enclave/*.cpp) 
+Enclave_Cpp_Objects := $(sort $(Enclave_Cpp_Files:.cpp=.o))
+
 
 $(Enclave_Name): Enclave/Enclave_t.o $(Enclave_Cpp_Objects)
+	@echo "Line 232: going to build $@ using $(Enclave_Cpp_Objects)"
 	@$(CXX) $^ -o $@ $(Enclave_Link_Flags)
 	@echo "LINK =>  $@"
 

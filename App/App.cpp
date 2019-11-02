@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <iostream>
-#include <torch/torch.h>
+// #include <torch/torch.h>
 
 #define BUFSIZE 1024
 
@@ -25,10 +25,10 @@ int main()
         printf("error when create enclave\n");
         printf("%02X", ret);
     }
-    torch::Tensor tensor = torch::eye(3);
-    std::cout << tensor << std::endl;
+    // torch::Tensor tensor = torch::eye(3);
+    // std::cout << tensor << std::endl;
 
-   // hello(eid);
+   hello(eid);
 
     printf("program exit...");
 
