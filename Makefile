@@ -197,21 +197,21 @@ App/Enclave_u.c: App/Enclave_u.h
 
 App/Enclave_u.o: App/Enclave_u.c
 	@$(CC) $(SGX_COMMON_CFLAGS) $(App_C_Flags) -c $< -o $@
-	@echo "CC   $@  <=  $<"
+	@echo "generated $@  using  $<"
 
 App/%.o: App/%.cpp  App/Enclave_u.h
 	@$(CXX) $(SGX_COMMON_CXXFLAGS) $(App_Cpp_Flags) -c $< -o $@
-	@echo "CXX $@ <=  $<"
+	@echo "generated $@ using  $<"
 
 $(App_Name): App/Enclave_u.o $(App_Cpp_Objects)
 	@$(CXX) $^ -o $@ $(App_Link_Flags)
-	@echo "LINK =>  $@"
+	@echo "linked $@ with $(App_Cpp_Objects) Enclave_u.o"
 
 ######## Enclave Objects ########
 
 Enclave/Enclave_t.h: $(SGX_EDGER8R) Enclave/Enclave.edl
 	@cd Enclave && $(SGX_EDGER8R) --trusted ../Enclave/Enclave.edl --search-path ../Enclave --search-path $(SGX_SDK)/include
-	@echo "GEN  =>  $@"
+	@echo "generated $@ by sgx_edger8r"
 
 Enclave/Enclave_t.c: Enclave/Enclave_t.h
 
@@ -222,7 +222,7 @@ Enclave/Enclave_t.o: Enclave/Enclave_t.c
 
 Enclave/%.o: Enclave/%.cpp Enclave/Enclave_t.h
 	@$(CXX) $(SGX_COMMON_CXXFLAGS) $(Enclave_Cpp_Flags) -c $< -o $@
-	@echo "Line 225: CXX  $@ <=  $<"
+	@echo "Line 225: generated  $@ using $<"
 
 Enclave_Cpp_Files := $(wildcard Enclave/*.cpp) 
 Enclave_Cpp_Objects := $(sort $(Enclave_Cpp_Files:.cpp=.o))

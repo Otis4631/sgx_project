@@ -1,6 +1,7 @@
-#include "Mat.h"
+#include "mat.h"
 #include "Enclave.h"
 #include "Enclave_t.h"
+#include "layer.h"
 #include <sgx_trts.h>
 
 
@@ -8,21 +9,17 @@
 
 using namespace std;
 
-void hello()
-{
-    vect_double v1 = {1, 2, 3, 4, 5, 6};
-    vect_int  shape1 = {3, 2};
-    vect_double v2 = {1,2};
-    vect_int  shape2 = {2,1};
+void test() {
+    vect_double data = {2,3,1,9,4,7,3,5,8,2,2,2,1,3,4,5};
+    vect_int shape = {1,4,4,1};
 
-    try{
-    Mat mat1(v1, shape1);
-    Mat mat2(v2, shape2);
-    Mat mat = mat1.dot2d(mat2);
-    mat.print();
+    Mat x(data, shape);
+    x.print();
+    Pool pooling(2, 2);
+    x = pooling.forward(x);
+    x.print();
+}
 
-    }
-    catch(exception& e){
-        printf(e.what());
-    }
+void hello() {
+    test();
 }
