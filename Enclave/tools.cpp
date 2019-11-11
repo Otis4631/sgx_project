@@ -1,9 +1,15 @@
+
 #include "tools.h"
 #include <sgx_trts.h>
 #include "Enclave_t.h"
 #include <string>
 #include <vector>
 #include <string.h>
+#include <math.h> //fmod
+#include <random>
+
+#define BUF_SIZE 1024
+
 /***************   Tools   *****************************/
 
 //C++ 去字符串两边的空格
@@ -18,11 +24,10 @@ void trim(string &s)
 }
 
 vector<int> range(int limit) {
-    int i = 0;
+    int i = -1;
     vector<int> res;
-    while(i ++ < limit) {
+    while(++ i < limit) 
         res.push_back(i);
-    }
     return res;
 }
 
@@ -59,6 +64,18 @@ int printf(const char *fmt, ...)
     return (int)strnlen(buf, BUF_SIZE - 1) + 1;
 
 }
+
+
+const char* make_indices(const char *fmt, ...) {
+    static char* static_buf = new char(BUF_SIZE);
+    //buf = { '\0' };
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(static_buf, BUF_SIZE, fmt, ap);
+    va_end(ap);
+    return (const char *)static_buf;
+}
+
 string get_n_space(int n) {
     /**
      * 返回n个空格
@@ -102,14 +119,27 @@ void set_precison(string& s, int precision)//precision n.精度
 /***************   Tools   *****************************/
 
 /**************** special functions *******************/
-double rand_double() {
+double rand_double(vector<int> param , int precision) {
+    int start = 0;
+    int end = 1;
+    precision = pow(10, precision);
+    if(param.size() == 2) {
+        start = param[0];
+        end = param[1];
+    }
+    start *= precision;
+    end *= precision; 
     unsigned char double_buffer[1] = {'\0'};
-    sgx_status_t res = sgx_read_rand(double_buffer, 1);
-    if(res != SGX_SUCCESS) {
+    sgx_status_t res_s = sgx_read_rand(double_buffer, 1);
+    if(res_s != SGX_SUCCESS) {
         printf("failed create random number\n");
         throw exception();
     }
-    return (double)(*double_buffer);
+    int int_left = (int)(*double_buffer);
+    int interval = (int)(end - start);
+    double res = int_left % interval + start;
+    res /= precision;
+    return res;
 }
 
 /**************** special functions *******************/

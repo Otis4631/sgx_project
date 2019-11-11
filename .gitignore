@@ -31,3 +31,15 @@ core
 *.exe
 *.out
 *.app
+app
+test_run
+
+# 桥接文件
+*_u.*
+*_t.*
+
+# 测试文件
+test/
+
+.config_SIM_DEBUG_x64
+test_makefile

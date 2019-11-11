@@ -5,7 +5,12 @@
         "string": "cpp",
         "bitset": "cpp",
         "initializer_list": "cpp",
-        "utility": "cpp"
+        "utility": "cpp",
+        "*.tcc": "cpp",
+        "exception": "cpp",
+        "cmath": "cpp",
+        "random": "cpp",
+        "new": "cpp"
     },
     "C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools",
     "git.ignoreLimitWarning": true

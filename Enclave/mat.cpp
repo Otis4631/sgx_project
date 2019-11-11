@@ -1,5 +1,8 @@
 #include "mat.h"
 
+#define PRECISON 4
+
+
 int  get_length_from_shape(vect_int& s) {
     int _size = 1;
     int d = (int)s.size();
@@ -7,18 +10,25 @@ int  get_length_from_shape(vect_int& s) {
         _size *= s[-- d];
     return _size;
 }
-Mat zeros(vect_int& shape) {
+Mat zeros(vect_int shape) {
     int size = (int)get_length_from_shape(shape);
-    vect_double _data(size, 1);
+    vect_double _data(size, 0);
     return Mat(_data, shape);
 }
-Mat ones(vect_int& shape) {
+Mat ones(vect_int shape) {
     int size = (int)get_length_from_shape(shape);
     vect_double _data(size, 1);
     return Mat(_data, shape);
 }
 
-
+Mat randn(vect_int shape, const vect_int intervals) {
+    vect_double data;
+    for(auto i: range(get_length_from_shape(shape))) {
+        double res = rand_double(intervals);
+        data.push_back(res);
+    }
+    return Mat(data, shape);
+}
 /*************** Exception  Defination*****************************/
 struct ShapeMatchError : public exception
 {
@@ -332,7 +342,7 @@ void  Mat::matrix_to_string(string& s, int dimension_level, int& ped, int c) {
     for(; i<length;i++){
         if(dimension_level == dimension){
             string _double_str = to_string(data[ped ++]);
-            set_precison(_double_str, 2);
+            set_precison(_double_str, PRECISON);
             s += _double_str;
             if (i < length - 1)
                 s += ", ";
@@ -514,6 +524,7 @@ Mat Mat::operator- (Mat& rmatrix) {
 }
 Mat Mat::operator[](const char* s) {
     vector<string> indices = split(s, ",");
+
     if(indices.size() != dimension) {
         //TODO:expection
         printf("can't reslove indices strings\n");
@@ -522,8 +533,11 @@ Mat Mat::operator[](const char* s) {
     vect_int new_shape;
     vector<vect_int> intervals;
     _indices_new_shape(indices, new_shape, intervals); //获取切片后的shape和interval
-    
-    return _slice(new_shape, intervals);
+
+    Mat res_mat = _slice(new_shape, intervals);
+    //delete[] s;
+    //s = NULL; 
+    return res_mat;
 }
 
 double Mat::max() {
@@ -543,19 +557,10 @@ double Mat::sum() {
     return res;
 }
 double Mat::average() {
-    return sum() / size;
+    return sum() / (size * 1.0);
 }
 
 
-// Mat Mat::max(int axis) {
-//     vect_int new_shape(shape);
-//     if(axis != -1) {
-//         new_shape.erase(new_shape.begin() + axis);
-//     }
-//     for
-
-
-// }
    /*****Operator Overloading****/
 
 

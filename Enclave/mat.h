@@ -55,10 +55,13 @@ class Mat
         Mat operator+ (Mat& rmatrix);
         Mat operator- (Mat& rmatrix);
         Mat operator[](const char* s);
+
         Mat dot(Mat& rmat); //矩阵乘法
         void print(); 
 };
 /***************   Class defination   *****************************/
 
-Mat zeros(vect_int& shape);
+Mat zeros(vect_int shape);
+Mat randn(vect_int shape, const vect_int intervals = {});
+
 #endif

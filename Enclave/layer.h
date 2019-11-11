@@ -1,16 +1,22 @@
-
 #include "mat.h"
+
+Mat pad(Mat& x, int pad_times, const double value = 0, bool in_place=false);
+
 class Layer {
     /**
-     * 层对象的抽象类
+     * 层对象的基类
     */
+
+    private:
+       
     public:
         Mat weight;
         Mat bias;
         vect_int weight_shape;
         vect_int bias_shape;
         virtual Mat forward(Mat& x){};
-        //~Layer(){};
+        virtual ~Layer(){};
+        
 };
 
 class Linear: public Layer {
@@ -38,3 +44,33 @@ class Pool: public Layer {
             string mode;
             vect_int out_shape;
 };
+
+class Conv: public Layer {
+    /**
+     * 卷积层类声明
+    */
+
+    private:
+        double _conv_single_step(Mat& a_slice_prev, int c);
+
+    public:
+        int in_channels;
+        int out_channels;
+        int f;
+        int stride;
+        int padding;
+        Conv(int _in_channels, int _out_channels, int _f, int _stride, int _padding, Mat* kernel_data);
+        Mat forward(Mat& x);
+        bool set_weights(vect_double& _weight);
+
+
+};
+
+class Relu: public Layer {
+
+    public:
+        bool inplace;
+        Relu(bool _inplace = true);
+        forward(Mat& x);
+}
+
