@@ -43,8 +43,26 @@ void conv_test() {
     delete conv;
 }
 
-void hello() {
-    //test();
-    conv_test();
+void dropout_test() {
+    vect_double data = {2,3,1,9,4,7,3,5,8,2,2,2,1,3,4,5};
+    vect_int shape = {4,4};
+    Mat x(data, shape);
+    x.print();
+    Layer * dropout = new Dropout(0.5);
+    x = dropout->forward(x);
+    x.print();
+}
 
+void adaptivePool_test() {
+    vect_double data = {2,3,1,9,4,7,3,5,8,2,2,2,1,3,4,5};
+    vect_int shape = {1,1,4,4};
+    Mat x(data, shape);
+    x.print();
+    Layer * apool = new AdaptivePool({2,3});
+    x = apool->forward(x);
+    x.print();
+}
+
+void hello() {
+    adaptivePool_test();
 }

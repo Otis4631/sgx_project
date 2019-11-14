@@ -9,7 +9,7 @@ using namespace std;
 int printf(const char *fmt, ...);
 const char* make_indices(const char *fmt, ...);
 
-double rand_double(vector<int> param, int precision = 3);
+double rand_double(vector<int> param);
 vector<int> range(int limit);
 string get_n_space(int n);
 string get_n_linefeed(int n);

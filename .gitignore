@@ -41,5 +41,11 @@ test_run
 # 测试文件
 test/
 
+
+# python 虚拟环境
+pytorch/
+*.py
+models/
+
 .config_SIM_DEBUG_x64
 test_makefile

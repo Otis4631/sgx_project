@@ -119,26 +119,23 @@ void set_precison(string& s, int precision)//precision n.精度
 /***************   Tools   *****************************/
 
 /**************** special functions *******************/
-double rand_double(vector<int> param , int precision) {
+double rand_double(vector<int> param) {
     int start = 0;
     int end = 1;
-    precision = pow(10, precision);
     if(param.size() == 2) {
         start = param[0];
         end = param[1];
     }
-    start *= precision;
-    end *= precision; 
-    unsigned char double_buffer[1] = {'\0'};
+    unsigned char double_buffer[1];
     sgx_status_t res_s = sgx_read_rand(double_buffer, 1);
     if(res_s != SGX_SUCCESS) {
         printf("failed create random number\n");
         throw exception();
     }
-    int int_left = (int)(*double_buffer);
+    double left = (double)((int)(*double_buffer) / 255.0); // 0-1之间的浮点数
+    
     int interval = (int)(end - start);
-    double res = int_left % interval + start;
-    res /= precision;
+    double res = left * interval + start;
     return res;
 }
 

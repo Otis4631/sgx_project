@@ -46,11 +46,12 @@ LINK_DIRECTORIES(${SGX_LIBRARY_PATH})#共享库链接其他库的时候的搜索
 
 ADD_LIBRARY(${Enclave_Name} SHARED ${Enclave_Cpp_Files} ${TRUSTED_BRIDGE})#生成libenclave.so
 TARGET_LINK_LIBRARIES(enclave sgx_trts)#链接libenclave.so需要的库
+
 TARGET_LINK_LIBRARIES(enclave  sgx_tcxx sgx_tstdc sgx_tcrypto sgx_tservice) #链接libenclave.so需要的库
 
 ADD_CUSTOM_COMMAND(OUTPUT ${Signed_enclave_name} POST_BUILD
     DEPENDS ${Enclave_Name}
-    COMMAND ${SGX_ENCLAVE_SIGNER} sign -key ${CMAKE_CURRENT_SOURCE_DIR}/Enclave_private.pem -enclave ${PROJECT_SOURCE_DIR}/build/Enclave/libenclave.so -out ${PROJECT_SOURCE_DIR}/build/App/enclave.signed.so -config ${PROJECT_SOURCE_DIR}/Enclave/Enclave.config.xml
+    COMMAND ${SGX_ENCLAVE_SIGNER} sign -key ${CMAKE_CURRENT_SOURCE_DIR}/Enclave_private.pem -enclave ${PROJECT_SOURCE_DIR}/build/Enclave/libenclave.so -out ${PROJECT_SOURCE_DIR}/build/enclave.signed.so -config ${PROJECT_SOURCE_DIR}/Enclave/Enclave.config.xml
     COMMENT "sign the enclave.so => ${Signed_enclave_name}"
 )
 ADD_CUSTOM_TARGET( enclave.sgined.so ALL

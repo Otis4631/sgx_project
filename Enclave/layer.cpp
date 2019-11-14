@@ -1,7 +1,7 @@
 #include "layer.h"
 #include "tools.h"
 #include <mbusafecrt.h> // sprintf_s()
-
+#include <math.h> 
 
 Mat pad(Mat& x, int pad_times, const double value, bool in_place) {
  if(x.dimension != 4) {
@@ -75,7 +75,6 @@ Linear::Linear(int in_f, int out_f, bool bi):
         bias = zeros(bias_shape);
     }
 }
-
 Mat Linear::forward(Mat& x) {
     if(x.shape[1] != weight_shape[0]) {
         printf("can't forward due to not matched shape, x: %d != weight: %d\n", x.shape[1], weight_shape[0]);
@@ -85,18 +84,24 @@ Mat Linear::forward(Mat& x) {
     return res_mat;
 }
 
+Pool::Pool(vect_int _f, vect_int _stride, string _mode):
+            kernel_size(_f), stride(_stride), mode(_mode) {}
+Pool::Pool(int f, int _stride, string _mode): mode(_mode) {
+    kernel_size = {f, f};
+    stride = {_stride, _stride};
 
+
+}
 Mat Pool::forward(Mat& x) {
     if(x.dimension != 4) {
         // TODO: exception
         printf("can not perform pooling forward on dimension %d\n", x.dimension);
         throw exception();
     }
-
     int out_m = x.shape[0];
     int out_C = x.shape[1]; 
-    int out_H = 1 + (x.shape[2] - f) / stride;
-    int out_W = 1 + (x.shape[3] - f) / stride;
+    int out_H = 1 + (x.shape[2] - kernel_size[0]) / stride[0];
+    int out_W = 1 + (x.shape[3] - kernel_size[1]) / stride[1];
     
 
     vect_int out_shape = {out_m, out_C, out_H, out_W};
@@ -108,10 +113,10 @@ Mat Pool::forward(Mat& x) {
         for(auto c: range(out_C))
             for(auto h: range(out_H))
                 for(auto w: range(out_W)) {
-                    vert_start = h * stride;
-                    vert_end = vert_start + f;
-                    horiz_start = w * stride;
-                    horiz_end = horiz_start + f;
+                    vert_start = h * stride[0];
+                    vert_end = vert_start + kernel_size[0];
+                    horiz_start = w * stride[1];
+                    horiz_end = horiz_start + kernel_size[1];
                     char char_indices[BUF_SIZE] = {'\0'};
                     sprintf_s(char_indices, BUF_SIZE, "%d,%d,%d:%d,%d:%d",
                      i, c, vert_start, vert_end, horiz_start, horiz_end);
@@ -148,7 +153,6 @@ bool Conv::set_weights(vect_double& _weight) {
     weight = res_mat;
     return true;
 }
-
 Mat Conv::forward(Mat& x) {
     if(x.dimension != 4) {
     printf("can not perform conv forward on dimension %d\n", x.dimension);
@@ -180,3 +184,54 @@ Mat Conv::forward(Mat& x) {
     return Z;
 
 }
+
+
+Relu::Relu(bool _inplace)
+    : inplace(_inplace) {};
+
+Mat Relu::forward(Mat& x) {
+    Mat res_mat = x;
+    if(!inplace)
+        res_mat = x.copy();
+    for(auto i: range(x.data.size())) {
+        if(x.data[i] < 0)
+            x.data[i] = 0;
+    }
+    return res_mat;
+}
+
+Dropout::Dropout(float _death_ratio, bool _inplace): death_ratio(_death_ratio), inplace(_inplace){}
+Mat Dropout::forward(Mat& x){
+    Mat res_mat = x;
+    if(!inplace)
+        res_mat = x.copy();
+    for(auto i: range(res_mat.data.size())) {
+        double r = rand_double({0,1});
+        if(r < death_ratio)
+            res_mat.data[i] = 0;
+    }
+    return res_mat;
+}
+
+AdaptivePool::AdaptivePool(vect_int _output_size, string _mode)
+    : out_size(_output_size), mode(_mode) {}
+Mat AdaptivePool::forward(Mat& x) {
+    if(x.dimension != 4) {
+    // TODO: exception
+    printf("can not perform Adaptive Pooling forward on dimension %d\n", x.dimension);
+    throw exception();
+    }
+    int8_t strideH = floor(x.shape[2] / out_size[0]); //2
+    int8_t strideW = floor(x.shape[3] / out_size[1]); // 1
+    //kernel_size=input_size−(output_size−1)∗stride
+    int8_t fH = x.shape[2] - (out_size[0] - 1) * strideH;
+    int8_t fW = x.shape[3] - (out_size[1] - 1) * strideW;
+
+    vect_int f = {fH, fW};
+    vect_int stride = {strideH, strideW};
+
+    Layer* pool = new Pool(f, stride, mode);
+
+    return pool->forward(x);
+
+} 

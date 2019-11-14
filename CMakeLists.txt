@@ -19,9 +19,17 @@ ENDIF(SGX_DEBUG EQUAL 1)
 
 
 set(CMAKE_PREFIX_PATH /data/lz/libtorch)
+SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build)
 find_package(Torch REQUIRED)
 
-
+find_package( OpenMP REQUIRED)
+if(OPENMP_FOUND)
+message("OPENMP FOUND")
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+endif()
 
 add_subdirectory(App)                           #执行App文件夹中的CMakeLists.txt
 add_subdirectory(Enclave)                       #执行Enclave文件夹中的CMakeLists.txt

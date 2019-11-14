@@ -35,12 +35,12 @@ class Pool: public Layer {
      * 池化层类声明 
      */
     public:
-        Pool(int _f, int _stride, string _mode="max"):
-            f(_f), stride(_stride), mode(_mode){}
+        Pool(vect_int _f, vect_int _stride, string _mode="max");
+        Pool(int f, int stride, string mode="max");
         Mat forward(Mat& x);
         
         private:
-            int f, stride;
+            vect_int kernel_size, stride;
             string mode;
             vect_int out_shape;
 };
@@ -71,6 +71,23 @@ class Relu: public Layer {
     public:
         bool inplace;
         Relu(bool _inplace = true);
-        forward(Mat& x);
-}
+        Mat forward(Mat& x);
+};
 
+class Dropout: public Layer {
+    public:
+        float death_ratio;
+        bool inplace;
+        Dropout(float _death_ratio, bool _inplace = false);
+        Mat forward(Mat& x);
+};
+
+class AdaptivePool: public Layer {
+    public:
+        AdaptivePool(vect_int _output_size, string _mode="max");
+        Mat forward(Mat& x);
+    private:
+        vect_int out_size;
+        string mode;
+
+};
