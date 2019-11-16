@@ -40,7 +40,7 @@ test_run
 
 # 测试文件
 test/
-
+build/
 
 # python 虚拟环境
 pytorch/
