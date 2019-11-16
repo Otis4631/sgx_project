@@ -28,4 +28,3 @@ Model::Model(vector<Layer*> _layers, size_t _n_layers)
     layers[18] = new Linear(4096, 10);
     
 }
-hello mother fuck
