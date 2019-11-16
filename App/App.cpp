@@ -36,19 +36,35 @@ int main(int argc, const char* argv[]) {
     // }
 
     auto module = torch::jit::load(argv[1]);
+    //module.dump(true,true,false);
     auto modules = module.get_modules(); // 3
     cout << module.name().qualifiedName() << endl;
     //auto methods = module.get_methods(); // only forward
     //cout << module.num_slots() << endl; //4
+    auto seq = (*modules.begin()).get_modules();
+    auto conv = *(seq.begin());
+    conv.dump(true,true,false);
+    auto i = conv.get_attribute("__constants__");
+    //'[stride, padding, dilation, groups, bias, padding_mode, output_padding, in_channels, out_channels, kernel_size]'
+    cout << conv.get_buffer("__constants__");
+    //auto slots = conv.;
+    //conv.dump(false,true,false);
+    //rcout << slots.size() << endl;
+    // for(auto i: slots) {
+    //     if(i.name() == "__constants__") {
+    //         auto dont = i.value().toIValue();
+    //         auto genr = dont.toGenericListRef();
+    //         for(auto j: genr) {
+    //             cout << j.toTensor() << endl;
+    //         }
+    //         break;
 
-    for(auto m: modules) {
-        auto dont = m;
-        cout << dont.get_modules().size() << endl;
-        auto a = m.name(); //Q
-        auto as = a.qualifiedName();
-        cout << as << endl;
-        
-    }
+    //     }
+    // }
+    //conv.dump(true,true,false);
+
+    //cout << conv_attr<< endl;
+ 
 
 
     //cout << modules[1];
