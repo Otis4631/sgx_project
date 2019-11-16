@@ -292,7 +292,7 @@ bool Mat::shape_match(vect_int _shape, int _size) {
     return true;
 }
 
-string Mat::shape_to_string(vect_int* _shape = NULL) {
+string Mat::shape_to_string(vect_int* _shape) {
     /**
      * 将shape转化为可打印的string
     */

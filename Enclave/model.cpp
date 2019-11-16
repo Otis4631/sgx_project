@@ -38,6 +38,9 @@ Model::Model() {
 Mat Model::forward(Mat& x) {
     for(auto i: range(n_layers)) {
         x = layers[i]->forward(x);
+        printf("  %d: \n", i);
+        printf(x.shape_to_string().c_str());
+        
     }
     return x;
 }

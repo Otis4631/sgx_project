@@ -44,7 +44,7 @@ class Mat
         Mat copy();
         Mat dot2d(Mat& rmat);
         Mat broadcast(vect_int& new_shape); 
-        string shape_to_string(vect_int* _shape);
+        string shape_to_string(vect_int* _shape=NULL);
         bool shape_match(vect_int _shape, int _size);
         Mat(){};
 
