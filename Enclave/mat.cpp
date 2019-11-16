@@ -1,7 +1,7 @@
 #include "mat.h"
 
 #define PRECISON 4
-
+#define P_DEEP 5
 
 int  get_length_from_shape(vect_int& s) {
     int _size = 1;
@@ -314,8 +314,8 @@ string Mat::shape_to_string(vect_int* _shape = NULL) {
 }
 
 void  Mat::print() {
-    char shape_tmp[BUFSIZ] = {'\0'};
-    char matrix_tmp[BUFSIZ * 2] = {'\0'};
+    char shape_tmp[BUF_SIZE] = {'\0'};
+    char matrix_tmp[BUF_SIZE * 10] = {'\0'};
     string matrix_str;
     string shape_str = shape_to_string();
     int _ = 0;
@@ -341,13 +341,22 @@ void  Mat::matrix_to_string(string& s, int dimension_level, int& ped, int c) {
     int length = shape[dimension_level - 1];
     for(; i<length;i++){
         if(dimension_level == dimension){
-            string _double_str = to_string(data[ped ++]);
+            if(i> P_DEEP && i < length - P_DEEP) {
+                ped ++;
+                continue;
+            }
+            string tab = "\t";
+            string _double_str = tab + to_string(data[ped ++]) ;
             set_precison(_double_str, PRECISON);
             s += _double_str;
             if (i < length - 1)
                 s += ", ";
         }
-        else{
+        else {
+                if(i > P_DEEP && i < length - P_DEEP) {
+                ped += shape[dimension_level];
+                continue;
+            }
             int comma_gate = 0;
             if (i == length - 1)
                 comma_gate = 1;

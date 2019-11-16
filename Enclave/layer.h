@@ -1,6 +1,8 @@
+#ifndef _LAYER_H_
+#define _LAYER_H_
 #include "mat.h"
 
-Mat pad(Mat& x, int pad_times, const double value = 0, bool in_place=false);
+Mat pad(Mat& x, int pad_times, const double value=0, bool in_place=false);
 
 class Layer {
     /**
@@ -59,7 +61,7 @@ class Conv: public Layer {
         int f;
         int stride;
         int padding;
-        Conv(int _in_channels, int _out_channels, int _f, int _stride, int _padding, Mat* kernel_data);
+        Conv(int _in_channels, int _out_channels, int _f, int _stride, int _padding=0, Mat* kernel_data=NULL);
         Mat forward(Mat& x);
         bool set_weights(vect_double& _weight);
 
@@ -91,3 +93,4 @@ class AdaptivePool: public Layer {
         string mode;
 
 };
+#endif

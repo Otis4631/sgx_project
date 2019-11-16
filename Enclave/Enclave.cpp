@@ -3,7 +3,7 @@
 #include "Enclave_t.h"
 #include "layer.h"
 #include <sgx_trts.h>
-
+#include "model.h"
 
 #include "tools.h"
 
@@ -29,6 +29,15 @@ void pad_test() {
     pad(x, 3, 0, true);
     x.print();
 }
+
+void big_pad_test() {
+
+    Mat x = randn({1,1,225,225}, {0,1});
+    x.print();
+    pad(x, 1, 0, true);
+    x.print();
+}
+
 
 void conv_test() {
     vect_double data = {1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,1,1,0,0,1,1,0,0};
@@ -63,6 +72,13 @@ void adaptivePool_test() {
     x.print();
 }
 
+void model_test() {
+    Mat x = randn({1,1,224,224}, {0, 1});
+    auto model = new Model();
+    x = model->forward(x);
+    x.print();
+}
+
 void hello() {
-    adaptivePool_test();
+    big_pad_test();
 }

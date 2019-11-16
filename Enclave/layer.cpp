@@ -12,32 +12,30 @@ Mat pad(Mat& x, int pad_times, const double value, bool in_place) {
     if(!in_place)
         Mat res_mat = x.copy();
 
-
-
-
     vect_int new_shape(res_mat.shape);
     for(auto t: range(pad_times)) {
         int insert_count = 0; //记录插入的数据
 
-        for(auto m: range(res_mat.shape[0] + res_mat.shape[1]))
-        {
-            int fig_size = new_shape[2] * new_shape[3];
-            int base_addr = m * fig_size + insert_count;
-            res_mat.data.insert(res_mat.data.begin() + base_addr, new_shape.back() + 3, value); // 插入最上方 1
-            insert_count +=  new_shape.back() + 3;
-            // 插入两侧 2, 3
-            int iter = base_addr + new_shape.back() + 3;
-            int step = 0;
-            int block = new_shape[3];
-            for(auto h: range(new_shape[2])) {
-                step += block;
-                res_mat.data.insert(res_mat.data.begin() + iter + step, 2, value);
-                insert_count += 2;
-                step += 2; // step 用于指示当前与base的距离，每隔 block数插入2个value.
-            }
-            res_mat.data.insert(res_mat.data.begin() + iter + step, new_shape.back() + 1, value); // 4
-            insert_count += new_shape.back() + 1;
-            } // c, m
+            for(auto m: range(res_mat.shape[0]))
+                for(auto _: range(res_mat.shape[1]))
+                {
+                    int fig_size = new_shape[2] * new_shape[3];
+                    int base_addr = m * fig_size + insert_count;
+                    res_mat.data.insert(res_mat.data.begin() + base_addr, new_shape.back() + 3, value); // 插入最上方 1
+                    insert_count +=  new_shape.back() + 3;
+                    // 插入两侧 2, 3
+                    int iter = base_addr + new_shape.back() + 3;
+                    int step = 0;
+                    int block = new_shape[3];
+                    for(auto h: range(new_shape[2])) {
+                        step += block;
+                        res_mat.data.insert(res_mat.data.begin() + iter + step, 2, value);
+                        insert_count += 2;
+                        step += 2; // step 用于指示当前与base的距离，每隔 block数插入2个value.
+                }
+                res_mat.data.insert(res_mat.data.begin() + iter + step, new_shape.back() + 1, value); // 4
+                insert_count += new_shape.back() + 1;
+                } // c, m
             new_shape[2] += 2;
             new_shape[3] += 2;
     } // t
@@ -63,16 +61,16 @@ double Conv::_conv_single_step(Mat& a_slice_prev, int c) {
     return Z;
 }
 
-Linear::Linear(int in_f, int out_f, bool bi): 
-            in_features(in_f), out_features(out_f), have_bias(bi) {
+Linear::Linear(int in_f, int out_f, bool bi)
+    : in_features(in_f), out_features(out_f), have_bias(bi) {
     weight_shape.push_back(in_features);
     weight_shape.push_back(out_features);
 
-    weight = zeros(weight_shape); //TODO: choose best weight initializer
-    weight.print();
+    weight = randn(weight_shape,{0, 1}); //TODO: choose best weight initializer
+    //weight.print();
     if(have_bias) {
         bias_shape.push_back(out_f);
-        bias = zeros(bias_shape);
+        bias = randn(bias_shape, {0, 1});
     }
 }
 Mat Linear::forward(Mat& x) {
@@ -85,11 +83,13 @@ Mat Linear::forward(Mat& x) {
 }
 
 Pool::Pool(vect_int _f, vect_int _stride, string _mode):
-            kernel_size(_f), stride(_stride), mode(_mode) {}
+            kernel_size(_f), stride(_stride), mode(_mode) {
+                weight = randn(kernel_size, {0, 1});
+            }
 Pool::Pool(int f, int _stride, string _mode): mode(_mode) {
     kernel_size = {f, f};
     stride = {_stride, _stride};
-
+    weight = randn(kernel_size, {0, 1});
 
 }
 Mat Pool::forward(Mat& x) {
@@ -130,18 +130,20 @@ Mat Pool::forward(Mat& x) {
 }
 
 
-Conv::Conv(int _in_channels, int _out_channels, int _f, int _stride, int _padding = 0, Mat* kernel_data = NULL): 
+Conv::Conv(int _in_channels, int _out_channels, int _f, int _stride, int _padding, Mat* kernel_data): 
     in_channels(_in_channels), out_channels(_out_channels), f(_f), stride(_stride), padding(_padding) {
         weight_shape = {out_channels, in_channels, f, f};
         bias_shape = {out_channels};
-        bias = zeros(bias_shape);
+        bias = randn(bias_shape, {0, 1});
         if(kernel_data) {
             if(get_length_from_shape(weight_shape) != kernel_data->size) {
                 printf("shape of filter data does not match the parameters passed before\n");
                 throw exception();
             }
             weight = *kernel_data;
-        }
+        } 
+        else
+            weight = randn(weight_shape, {0, 1}); 
         
 }
 bool Conv::set_weights(vect_double& _weight) {
@@ -182,7 +184,6 @@ Mat Conv::forward(Mat& x) {
                 }
     }
     return Z;
-
 }
 
 
