@@ -11,10 +11,10 @@
 <!-- 256M
 <HeapMaxSize>0x10000000</HeapMaxSize>  -->
 
-<!-- 1G
+<!-- 1G 1s
 <HeapMaxSize>0x40000000</HeapMaxSize>  -->
 
-<!-- 10G -->
+<!-- 10G  15s -->
 <HeapMaxSize>0x280000000</HeapMaxSize> 
 
   <TCSNum>10</TCSNum>

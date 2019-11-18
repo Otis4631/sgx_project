@@ -22,7 +22,7 @@ class Mat
 {
     private:
         void _indices_new_shape(vector<string>& s, vect_int& res_shape, vector<vect_int>& interval);
-        void _partition(vect_double& new_data, vector<vect_int>& intervals, int level, int base, int end);
+        void _partition(vect_double& new_data, vector<vect_int>& intervals, int level, int base, int end, int& count);
         Mat _slice(vect_int& new_shape, vector<vect_int>& intervals);
         // 获取切片后的矩阵shape以及区间
         void matrix_to_string(string& s, int dimension_level, int& ped, int c);
@@ -46,6 +46,7 @@ class Mat
         Mat broadcast(vect_int& new_shape); 
         string shape_to_string(vect_int* _shape=NULL);
         bool shape_match(vect_int _shape, int _size);
+        int reshape(vect_int new_shape);
         Mat(){};
 
         Mat(vect_double _data, vector<int> _shape);
@@ -55,6 +56,7 @@ class Mat
         Mat operator+ (Mat& rmatrix);
         Mat operator- (Mat& rmatrix);
         Mat operator[](const char* s);
+        Mat operator[](string str);
 
         Mat dot(Mat& rmat); //矩阵乘法
         void print(); 

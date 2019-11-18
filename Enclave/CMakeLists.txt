@@ -25,7 +25,7 @@ ADD_CUSTOM_TARGET(
 )
 
 SET(Crypto_Library_Name sgx_tcrypto)
-FILE(GLOB_RECURSE Enclave_Cpp_Files "*.cpp")
+FILE(GLOB_RECURSE Enclave_Cpp_Files "e_*.cpp")
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/Include ${PROJECT_SOURCE_DIR}/build/Enclave ${SGX_SDK}/include ${SGX_SDK}/include/tlibc ${SGX_SDK}/include/libcxx)
 SET(Enclave_C_Flags "${SGX_COMMON_CFLAGS} -nostdinc -fvisibility=hidden -fpie -ffunction-sections -fdata-sections -fstack-protector-strong")
 SET(Enclave_Cpp_Flags "${Enclave_C_Flags} -std=c++11 -nostdinc++")

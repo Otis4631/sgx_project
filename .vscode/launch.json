@@ -34,7 +34,7 @@
             "name": "gdb-test",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/test_run",
+            "program": "${workspaceFolder}/Enclave/test_run",
             "MIMode": "gdb",
             "cwd": "${workspaceFolder}",
             "setupCommands": [

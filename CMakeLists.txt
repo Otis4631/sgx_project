@@ -14,6 +14,7 @@ IF(SGX_DEBUG EQUAL 1)
 ELSE(SGX_DEBUG EQUAL 1)
    SET(SGX_COMMON_CFLAGS "${SGX_COMMON_CFLAGS} -O2")
 ENDIF(SGX_DEBUG EQUAL 1)
+add_definitions(-D SGX)
 
 ######################## Libtorch settings #############################################
 

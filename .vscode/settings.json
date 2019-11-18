@@ -62,7 +62,10 @@
         "typeinfo": "cpp",
         "valarray": "cpp",
         "algorithm": "cpp",
-        "memory": "cpp"
+        "memory": "cpp",
+        "__hash_table": "cpp",
+        "__split_buffer": "cpp",
+        "rope": "cpp"
     },
     "C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools",
     "git.ignoreLimitWarning": true,

@@ -5,7 +5,7 @@
 #include <iostream>
 #include <torch/script.h> // One-stop header.
 #include <torch/torch.h>
-
+#include <ctime>
 #include <iostream>
 #include <memory>
 
@@ -52,11 +52,17 @@ int main(int argc, const char* argv[]) {
     // cout << output.slice(/*dim=*/1, /*start=*/0, /*end=*/5);
 
     sgx_enclave_id_t eid = 0;
+
+    time_t begin,end;
+    begin = clock();
     sgx_status_t ret = sgx_create_enclave("enclave.signed.so", SGX_DEBUG_FLAG, NULL, NULL, &eid, NULL);
+    end = clock();
     if(ret != SGX_SUCCESS){
         std::cerr << "error when create enclave\n" << ret;
         return -1;
     }
+    
+    std::cout << "successfully create enclave taking " << (double)(end - begin) / CLOCKS_PER_SEC << "s" << endl;
     hello(eid);
     sgx_destroy_enclave(eid);
     printf("\nprogram exit...");

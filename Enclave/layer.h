@@ -61,7 +61,7 @@ class Conv: public Layer {
         int f;
         int stride;
         int padding;
-        Conv(int _in_channels, int _out_channels, int _f, int _stride, int _padding=0, Mat* kernel_data=NULL);
+        Conv(int _in_channels, int _out_channels, int _f, int _stride, int _padding=0, bool bi = false, Mat* kernel_data=NULL);
         Mat forward(Mat& x);
         bool set_weights(vect_double& _weight);
 
